@@ -6,21 +6,19 @@ $navItems = [
     ['name' => 'Contact', 'href' => '/contact'],
 ];
 @endphp
-
-<nav class="bg-white shadow-lg">
-    <div class="max-w-6xl mx-auto px-4">
-        <div class="flex justify-between">
-            <div class="flex space-x-7">
-                <div>
-                    <a href="/" class="flex items-center py-4 px-2">
-                        <span class="font-semibold text-gray-500 text-lg">ChronoChic</span>
-                    </a>
-                </div>
+<nav style="background-color: rgba(20, 15, 10, 0.9); backdrop-filter: blur(5px); box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <div style="max-width: 80rem; margin-left: auto; margin-right: auto; padding: 0.75rem 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <a href="/" style="font-family: 'Playfair Display', serif; color: #FFD700; font-size: 1.65rem; font-weight: bold; letter-spacing: 0.05em;">TimeQuest</a>
             </div>
-            <div class="hidden md:flex items-center space-x-3">
-                @foreach($navItems as $item)
-                    <a href="{{ $item['href'] }}" class="py-4 px-2 text-gray-500 font-semibold hover:text-green-500 transition duration-300">
-                        {{ $item['name'] }}
+            <div style="display: flex; gap: 2rem;">
+                @foreach(['Home', 'Catalog', 'About', 'Contact'] as $item)
+                    <a href="{{ strtolower($item) === 'home' ? '/' : '/' . strtolower($item) }}"
+                       style="color: #FFF8DC; font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 500; transition: all 0.3s ease-in-out; position: relative; padding-bottom: 0.25rem;"
+                       onmouseover="this.style.color='#FFD700'" 
+                       onmouseout="this.style.color='#FFF8DC'">
+                        {{ $item }}
                     </a>
                 @endforeach
             </div>

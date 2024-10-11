@@ -1,13 +1,30 @@
-/** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./resources/**/*.blade.php",
-    "./resources/**/*.js",
-    "./resources/**/*.vue",
+    './resources/**/*.blade.php',
+    './resources/**/*.js',
+    './resources/**/*.vue',
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        'navbar-bg': '#1C1814',
+        'logo-gold': '#D4AF37',
+        'menu-text': '#F5F5F5',
+        'heading-white': '#FFFFFF',
+        'subheading-gold': '#E6C770',
+        'button-bg': '#D4AF37',
+        'button-text': '#1C1814',
+      },
+      fontFamily: {
+        'display': ['Cinzel', 'serif'],
+        'serif': ['Cormorant', 'serif'],
+        'sans': ['Raleway', 'sans-serif'],
+      },
+    },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/typography'),
+    require('@tailwindcss/aspect-ratio'),
+  ],
 }
-
