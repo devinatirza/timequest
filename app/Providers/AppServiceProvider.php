@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -23,6 +24,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        Blade::directive('mask', function ($expression) {
+            return "<?php echo substr($expression, 0, 3) . str_repeat('*', strlen($expression) - 6) . substr($expression, -3); ?>";
+        });
     }
 }

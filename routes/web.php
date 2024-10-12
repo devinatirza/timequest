@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\WishlistController;
+use App\Models\User;
+use App\Models\Wishlist;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,3 +22,13 @@ Route::get('/', function () {
 Route::get('/about', function () {
     return view('about');
 });
+Route::get('/contact', function () {
+    return view('contact');
+});
+Route::middleware(['auth', 'throttle:60,1'])->group(function () {
+    Route::post('/wishlist/add', [WishlistController::class, 'add']);
+    Route::post('/wishlist/remove', [WishlistController::class, 'remove']);
+});
+Route::get('/users/{user}/wishlists/{wishlist}', function (User $user, Wishlist $wishlist) {
+    return $wishlist;
+})->scopeBindings();

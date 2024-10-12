@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\User;
+use App\Models\Wishlist;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
@@ -14,6 +16,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         // 'App\Models\Model' => 'App\Policies\ModelPolicy',
+        Wishlist::class => WishlistPolicy::class,
     ];
 
     /**
@@ -26,5 +29,18 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
 
         //
+    }
+}
+
+class WishlistPolicy
+{
+    public function view(User $user, Wishlist $wishlist)
+    {
+        return $user->id === $wishlist->user_id;
+    }
+
+    public function delete(User $user, Wishlist $wishlist)
+    {
+        return $user->id === $wishlist->user_id;
     }
 }
