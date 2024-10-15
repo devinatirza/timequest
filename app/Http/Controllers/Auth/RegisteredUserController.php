@@ -67,20 +67,12 @@ class RegisteredUserController extends Controller
                 'image_path.max' => 'The profile picture cannot exceed 2MB in size.',
             ]);
 
-            Log::info('File upload debug: ', [
-                'hasFile' => $request->hasFile('image_path'),
-                'allFiles' => $request->allFiles(),
-            ]);
-
             if ($request->hasFile('image_path')) {
                 $uploadedFile = $request->file('image_path');
 
                 try {
-                    // Get the temporary path of the uploaded file
                     $tempPath = $uploadedFile->getPathname();
-                    Log::info('Temporary file path: ' . $tempPath);
 
-                    // Check if the file is actually an image
                     $imageInfo = @getimagesize($tempPath);
                     if ($imageInfo === false) {
                         Log::error('Invalid image type: ' . $uploadedFile->getClientMimeType());
@@ -88,9 +80,7 @@ class RegisteredUserController extends Controller
                             'image_path' => ['The uploaded file is not a valid image.']
                         ]);
                     }
-                    Log::info('Temporary file info: ' . json_encode($imageInfo));
 
-                    // Check for allowed image types
                     $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg'];
                     if (!in_array($imageInfo['mime'], $allowedMimeTypes)) {
                         Log::error('Invalid image type: ' . $uploadedFile->getClientMimeType());
@@ -105,22 +95,18 @@ class RegisteredUserController extends Controller
                     $imageName = Str::uuid() . '.jpg';
                     $path = storage_path('app/private/user_profiles/' . $imageName);
 
-                    // Resize and save as JPEG
                     $image->cover(300, 300)
                         ->toJpeg(80)
                         ->save($path);
 
                     $imagePath = 'user_profiles/' . $imageName;
 
-                    // Final check to ensure the saved file is an image
                     if (!exif_imagetype($path)) {
-                        unlink($path); // Delete the suspicious file
+                        unlink($path);
                         throw ValidationException::withMessages([
                             'image_path' => ['The uploaded file could not be processed as an image.']
                         ]);
                     }
-
-                    Log::info('Final image path: ' . $imagePath);
 
                 } catch (ValidationException $e) {
                     throw $e;
@@ -134,7 +120,6 @@ class RegisteredUserController extends Controller
                 $imagePath = 'default-picture.jpg';
             }
 
-            // Continue with user registration
             $sanitized = [
                 'id' => Str::uuid()->toString(),
                 'name' => strip_tags($validated['name']),
@@ -146,11 +131,13 @@ class RegisteredUserController extends Controller
             ];
 
             $salt = Str::random(32);
+            $hashedPassword = Hash::make($salt . $sanitized['password']);
+            
             $user = User::create([
                 'id' => $sanitized['id'],
                 'name' => $sanitized['name'],
                 'email' => $sanitized['email'],
-                'password' => Hash::make($salt . $sanitized['password']),
+                'password' => $hashedPassword,
                 'salt' => $salt,
                 'answer_1' => hash('sha256', $salt . $sanitized['answer_1']),
                 'answer_2' => hash('sha256', $salt . $sanitized['answer_2']),
@@ -161,7 +148,6 @@ class RegisteredUserController extends Controller
             event(new Registered($user));
 
             Auth::login($user);
-            Log::info('User created with image path: ' . $user->image_path);
 
             return redirect(RouteServiceProvider::HOME);
 

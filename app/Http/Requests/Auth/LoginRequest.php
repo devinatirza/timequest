@@ -8,22 +8,20 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class LoginRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
+    protected $maxAttempts = 5;
+    protected $decayMinutes = 15;
+
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\Rule|array|string>
-     */
     public function rules(): array
     {
         return [
@@ -32,54 +30,97 @@ class LoginRequest extends FormRequest
         ];
     }
 
-    /**
-     * Attempt to authenticate the request's credentials.
-     *
-     * @throws \Illuminate\Validation\ValidationException
-     */
+    public function getUser(): ?string
+    {
+        $user = $this->findUser();
+        return $user ? $user->email : null;
+    }
+
+    protected function findUser(): ?User
+    {
+        $email = $this->sanitizeInput($this->input('email'));
+        $user = User::where('email', $email)->first();
+
+        return $user;
+    }
+
     public function authenticate(): void
     {
-        $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
-            RateLimiter::hit($this->throttleKey());
+        $user = $this->findUser();
 
+        if (!$user) {
+            $this->failedLoginResponse('auth.failed');
+        }
+
+        if (!$this->checkPassword($user, $this->input('password'))) {
+            $this->failedLoginResponse('auth.failed');
+        }
+
+        if ($user->locked_until && $user->locked_until > now()) {
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                'email' => __('auth.locked', ['minutes' => now()->diffInMinutes($user->locked_until)]),
             ]);
         }
 
-        RateLimiter::clear($this->throttleKey());
+        $this->loginUser($user);
     }
 
-    /**
-     * Ensure the login request is not rate limited.
-     *
-     * @throws \Illuminate\Validation\ValidationException
-     */
-    public function ensureIsNotRateLimited(): void
+    protected function checkPassword(User $user, string $password): bool
     {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
-            return;
+        $saltedPassword = $user->salt . $password;
+        $result = Hash::check($saltedPassword, $user->password);
+
+        return $result;
+    }
+
+    protected function loginUser(User $user): void
+    {
+        Auth::login($user, $this->boolean('remember'));
+        RateLimiter::clear($this->throttleKey());
+        $this->session()->regenerate();
+
+        Log::info('Successful login', ['user_id' => $user->id, 'ip' => $this->ip()]);
+    }
+
+    protected function failedLoginResponse(string $messageKey): void
+    {
+        RateLimiter::hit($this->throttleKey());
+        
+        if (RateLimiter::attempts($this->throttleKey()) >= $this->maxAttempts) {
+            $this->lockoutUser();
         }
 
-        event(new Lockout($this));
-
-        $seconds = RateLimiter::availableIn($this->throttleKey());
+        Log::warning('Login failed', [
+            'email' => $this->input('email'),
+            'reason' => $messageKey,
+            'ip' => $this->ip()
+        ]);
 
         throw ValidationException::withMessages([
-            'email' => trans('auth.throttle', [
-                'seconds' => $seconds,
-                'minutes' => ceil($seconds / 60),
-            ]),
+            'email' => __($messageKey),
         ]);
     }
 
-    /**
-     * Get the rate limiting throttle key for the request.
-     */
     public function throttleKey(): string
     {
         return Str::transliterate(Str::lower($this->input('email')).'|'.$this->ip());
+    }
+
+    protected function sanitizeInput($input): string
+    {
+        return htmlspecialchars(strip_tags($input), ENT_QUOTES, 'UTF-8');
+    }
+
+    protected function lockoutUser(): void
+    {
+        $email = $this->input('email');
+        $user = User::where('email', $email)->first();
+
+        if ($user) {
+            $user->locked_until = now()->addMinutes($this->decayMinutes);
+            $user->save();
+            Log::warning('User account locked', ['user_id' => $user->id, 'ip' => $this->ip()]);
+        }
     }
 }

@@ -2,63 +2,45 @@
 
 namespace App\Http\Requests\Auth;
 
-use Illuminate\Auth\Events\Lockout;
+use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
-class LoginController extends FormRequest
+class LoginController extends Controller
 {
-    public function authorize(): bool
+    protected $maxAttempts = 5;
+    protected $decayMinutes = 15;
+
+    public function showLoginForm()
     {
-        return true;
+        return view('auth.login');
     }
 
-    public function rules(): array
+    public function login(LoginRequest $request)
     {
-        return [
-            'email' => ['required', 'string', 'email'],
-            'password' => ['required', 'string'],
-        ];
+        $request->authenticate();
+
+        $request->session()->regenerate();
+
+        return redirect()->intended('about');
     }
 
-    public function authenticate(): void
+    public function logout(Request $request)
     {
-        $this->ensureIsNotRateLimited();
+        Auth::logout();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
-            RateLimiter::hit($this->throttleKey());
+        $request->session()->invalidate();
 
-            throw ValidationException::withMessages([
-                'email' => __('auth.failed'),
-            ]);
-        }
+        $request->session()->regenerateToken();
 
-        RateLimiter::clear($this->throttleKey());
+        return redirect('/');
     }
 
-    public function ensureIsNotRateLimited(): void
-    {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
-            return;
-        }
-
-        event(new Lockout($this));
-
-        $seconds = RateLimiter::availableIn($this->throttleKey());
-
-        throw ValidationException::withMessages([
-            'email' => trans('auth.throttle', [
-                'seconds' => $seconds,
-                'minutes' => ceil($seconds / 60),
-            ]),
-        ]);
-    }
-
-    public function throttleKey(): string
-    {
-        return Str::transliterate(Str::lower($this->input('email')).'|'.$this->ip());
-    }
 }

@@ -15,19 +15,18 @@
         <form id="registerForm" class="mt-8 space-y-8" method="POST" action="{{ route('register') }}" enctype="multipart/form-data">
             @csrf
 
-            <!-- Profile Picture Upload Section -->
             <div class="flex flex-col items-center mt-6 mb-8">
-    <div class="w-32 h-32 rounded-full bg-logo-gold flex items-center justify-center overflow-hidden border-4 border-logo-gold shadow-lg">
-        <img id="profile-preview" src="{{ old('image_path') ? asset('storage/' . old('image_path')) : asset('images/default-profile.jpg') }}" alt="Profile Picture" class="w-100 h-100 object-cover" width="150" height="150">
-    </div>
-    <label for="profile_image" class="mt-2 px-3 py-2 bg-logo-gold text-button-text text-sm rounded-full cursor-pointer hover:bg-subheading-gold transition duration-300 ease-in-out">
-        Choose Profile Picture
-    </label>
-    <input id="profile_image" name="image_path" type="file" accept="image/jpeg,image/png" class="hidden" onchange="previewImage(event)">
-    @error('image_path')
-        <p class="text-error-text text-sm mt-1">{{ $message }}</p>
-    @enderror
-</div>
+                <div class="w-32 h-32 rounded-full bg-logo-gold flex items-center justify-center overflow-hidden border-4 border-logo-gold shadow-lg">
+                    <img id="profile-preview" src="{{ old('image_path') ? asset('storage/' . old('image_path')) : asset('images/default-profile.jpg') }}" alt="Profile Picture" class="w-100 h-100 object-cover" width="150" height="150">
+                </div>
+                <label for="profile_image" class="mt-2 px-3 py-2 bg-logo-gold text-button-text text-sm rounded-full cursor-pointer hover:bg-subheading-gold transition duration-300 ease-in-out">
+                    Choose Profile Picture
+                </label>
+                <input id="profile_image" name="image_path" type="file" accept="image/jpeg,image/png" class="hidden" onchange="previewImage(event)">
+                @error('image_path')
+                    <p class="text-error-text text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
 
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -86,10 +85,15 @@
             </div>
         </form>
 
-        <div class="text-center mt-4">
-            <a href="{{ route('login') }}" class="font-display text-sm text-subheading-gold hover:text-logo-gold transition duration-150 ease-in-out">
-                Already have an account? Sign in
-            </a>
+        <div class="mt-2">
+            <div class="relative">
+                <div class="relative flex justify-center text-sm">
+                    <a href="{{ route('login') }}"
+                        class="px-2 bg-black bg-opacity-50 text-text-white">
+                        Already have an account? Sign in
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </div>

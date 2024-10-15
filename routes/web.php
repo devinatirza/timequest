@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserImageController;
+use App\Http\Requests\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
@@ -15,12 +16,14 @@ Route::get('/about', function () {
     return view('about');
 });
 
-Route::middleware(['throttle:6,1'])->group(function () {
-    Route::get('/register', [RegisteredUserController::class, 'create'])
-        ->middleware('guest')
-        ->name('register');
-    Route::post('/register', [RegisteredUserController::class, 'store'])
-        ->middleware('guest');
+Route::middleware(['guest'])->group(function () {
+    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [LoginController::class, 'login']);
+
+    Route::middleware(['throttle:6,1'])->group(function () {
+        Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
+        Route::post('/register', [RegisteredUserController::class, 'store']);
+    });
 });
 
 Route::get('/profile', function () {
