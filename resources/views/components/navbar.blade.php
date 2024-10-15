@@ -1,11 +1,3 @@
-@php
-$navItems = [
-    ['name' => 'Home', 'href' => '/'],
-    ['name' => 'Catalog', 'href' => '/catalog'],
-    ['name' => 'About', 'href' => '/about'],
-    ['name' => 'Contact', 'href' => '/contact'],
-];
-@endphp
 <nav style="background-color: rgba(20, 15, 10, 0.9); backdrop-filter: blur(5px); box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
     <div style="max-width: 80rem; margin-left: auto; margin-right: auto; padding: 0.75rem 1rem;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -13,7 +5,7 @@ $navItems = [
                 <a href="/" style="font-family: 'Playfair Display', serif; color: #FFD700; font-size: 1.65rem; font-weight: bold; letter-spacing: 0.05em;">TimeQuest</a>
             </div>
             <div style="display: flex; gap: 2rem;">
-                @foreach(['Home', 'Catalog', 'About', 'Contact'] as $item)
+                @foreach(['Home', 'Catalog', 'About', 'Profile'] as $item)
                     <a href="{{ strtolower($item) === 'home' ? '/' : '/' . strtolower($item) }}"
                        style="color: #FFF8DC; font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 500; transition: all 0.3s ease-in-out; position: relative; padding-bottom: 0.25rem;"
                        onmouseover="this.style.color='#FFD700'" 

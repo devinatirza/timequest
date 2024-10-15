@@ -1,34 +1,55 @@
 <?php
 
-use App\Http\Controllers\WishlistController;
-use App\Models\User;
-use App\Models\Wishlist;
+use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserImageController;
 use Illuminate\Support\Facades\Route;
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
     return view('home');
 });
+
 Route::get('/about', function () {
     return view('about');
 });
-Route::get('/contact', function () {
-    return view('contact');
+
+Route::middleware(['throttle:6,1'])->group(function () {
+    Route::get('/register', [RegisteredUserController::class, 'create'])
+        ->middleware('guest')
+        ->name('register');
+    Route::post('/register', [RegisteredUserController::class, 'store'])
+        ->middleware('guest');
 });
-Route::middleware(['auth', 'throttle:60,1'])->group(function () {
-    Route::post('/wishlist/add', [WishlistController::class, 'add']);
-    Route::post('/wishlist/remove', [WishlistController::class, 'remove']);
-});
-Route::get('/users/{user}/wishlists/{wishlist}', function (User $user, Wishlist $wishlist) {
-    return $wishlist;
-})->scopeBindings();
+
+Route::get('/profile', function () {
+    if (Auth::check()) {
+        return redirect()->route('profile');
+    }
+    return redirect()->route('login');
+})->name('profile');
+
+// Route::middleware(['auth', 'verified'])->group(function () {
+//     Route::get('/dashboard', function () {
+//         return view('dashboard');
+//     })->name('dashboard');
+
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile/destroy', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::get('/user-image/{userId}/{filename}', [UserImageController::class, 'serveImage'])
+        ->name('user.image');
+
+    Route::get('/profile-image/{filename}', function ($filename) {
+        $path = 'profile_images/' . $filename;
+        if (!Storage::disk('private')->exists($path)) {
+            abort(404);
+        }
+        $file = Storage::disk('private')->get($path);
+        $type = Storage::disk('private')->mimeType($path);
+        return response($file, 200)->header('Content-Type', $type);
+    })->name('profile.image');
+
+require __DIR__.'/auth.php';
