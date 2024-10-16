@@ -63,12 +63,11 @@
             </button>
         </div>
     </form>
-
-    <div class="mt-2">
+    <div>
         <div class="relative">
             <div class="relative flex justify-center text-sm">
                 <a href="{{ route('register') }}"
-                    class="px-2 bg-black bg-opacity-50 text-text-white">
+                    class="px-2 text-text-white">
                     Didn't have an account? Register Now
                 </a>
             </div>

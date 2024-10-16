@@ -30,12 +30,6 @@ class LoginRequest extends FormRequest
         ];
     }
 
-    public function getUser(): ?string
-    {
-        $user = $this->findUser();
-        return $user ? $user->email : null;
-    }
-
     protected function findUser(): ?User
     {
         $email = $this->sanitizeInput($this->input('email'));
@@ -53,14 +47,16 @@ class LoginRequest extends FormRequest
             $this->failedLoginResponse('auth.failed');
         }
 
-        if (!$this->checkPassword($user, $this->input('password'))) {
-            $this->failedLoginResponse('auth.failed');
-        }
+        Log::info('Locked until', ['locked_until' => $user->locked_until]);
 
         if ($user->locked_until && $user->locked_until > now()) {
             throw ValidationException::withMessages([
                 'email' => __('auth.locked', ['minutes' => now()->diffInMinutes($user->locked_until)]),
             ]);
+        }
+
+        if (!$this->checkPassword($user, $this->input('password'))) {
+            $this->failedLoginResponse('auth.failed');
         }
 
         $this->loginUser($user);
