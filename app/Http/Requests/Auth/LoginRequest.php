@@ -47,8 +47,6 @@ class LoginRequest extends FormRequest
             $this->failedLoginResponse('auth.failed');
         }
 
-        Log::info('Locked until', ['locked_until' => $user->locked_until]);
-
         if ($user->locked_until && $user->locked_until > now()) {
             throw ValidationException::withMessages([
                 'email' => __('auth.locked', ['minutes' => now()->diffInMinutes($user->locked_until)]),

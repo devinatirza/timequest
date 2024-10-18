@@ -15,7 +15,9 @@ module.exports = {
           'subheading-gold': '#E6C770',
           'button-bg': '#D4AF37',
           'button-text': '#1C1814',
-          'error-text' : '#EE6B6E'
+          'error-text' : '#EE6B6E',
+          'button-red' : '#ef4444',
+          'button-red-hover' : '#b91c1c'
         },
         fontFamily: {
           'display': ['Cinzel', 'serif'],

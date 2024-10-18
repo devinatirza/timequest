@@ -5,28 +5,26 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Str;
-use Illuminate\Validation\Rules;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class ForgotPasswordController extends Controller
 {
     protected $maxAttempts = 5;
-    protected $decayMinutes = 1;
+    protected $decayMinutes = 15;
+    protected $tokenExpiration = 3;
 
     public function showForgotPasswordForm()
     {
-        Log::info('Displaying forgot password form.');
         return view('auth.forgot-password');
     }
 
     public function verifyKBAAnswers(Request $request)
     {
-        Log::info('Verifying KBA answers for password reset', ['email' => $request->email]);
-
-        // Input validation
         $request->validate([
             'email' => 'required|email',
             'answer_1' => 'required|string|max:255',
@@ -35,33 +33,24 @@ class ForgotPasswordController extends Controller
         ]);
 
         $email = filter_var($request->email, FILTER_SANITIZE_EMAIL);
-        Log::info('Sanitized email', ['email' => $email]);
 
-        // Fetch user from the database
         $user = User::where('email', $email)->first();
         if (!$user) {
-            Log::warning('User not found for email', ['email' => $email]);
             return back()->withErrors(['email' => __('The provided information is incorrect. Please check your input and try again.')]);
         }
 
-        Log::info('User found', ['user_id' => $user->id]);
-
-        // Check if account is locked
         if ($user->locked_until && $user->locked_until > now()) {
             $minutes = now()->diffInMinutes($user->locked_until);
-            Log::warning('Account is locked', ['user_id' => $user->id, 'locked_until' => $user->locked_until]);
             return back()->withErrors(['email' => __('This account is locked. Please try again in :minutes minutes.', ['minutes' => $minutes])]);
         }
 
         $key = 'password_reset_' . $email;
-        Log::info('Rate limiter key', ['key' => $key]);
 
         if (!$this->verifyKBAAnswersForUser($user, $request->only(['answer_1', 'answer_2', 'answer_3']))) {
             Log::warning('KBA answers verification failed', ['user_id' => $user->id]);
 
             RateLimiter::hit($key);
             $attemptsLeft = $this->maxAttempts - RateLimiter::attempts($key);
-            Log::info('Attempts left', ['attempts_left' => $attemptsLeft]);
 
             if ($attemptsLeft <= 0) {
                 $this->lockoutUser($email);
@@ -71,114 +60,110 @@ class ForgotPasswordController extends Controller
             return back()->withErrors(['email' => __('The provided information is incorrect. You have :attempts attempts left.', ['attempts' =>$attemptsLeft])]);
         }
 
-        // Clear rate limiter after successful verification
         RateLimiter::clear($key);
-        Log::info('KBA answers verified successfully', ['user_id' => $user->id]);
 
-        // Generate password reset token
-        // $token = $this->generateResetToken($user);
-        // Log::info('Password reset token generated', ['user_id' => $user->id, 'token' => $token]);
+        $token = $this->generateResetToken($user->id, $user->salt);
 
-        $token = $request->session() . Str::random(10);
-
-        // Redirect to reset form
-        return redirect()->route('password.reset', ['token' => $token, 'email' => $user->email]);
+        return redirect()->route('password.reset')->withCookie($token)->with('email', $user->email);
     }
 
-    public function showResetForm(Request $request, $token)
+    public function showResetForm(Request $request)
     {
-        Log::info('Displaying reset password form', ['token' => $token, 'email' => $request->email]);
-        return view('auth.reset-password', ['token' => $token, 'email' => $request->email]);
+        $token = $request->cookie('password_reset_token');
+        $email = $request->session()->get('email');
+
+        if (!$token || !$email) {
+            Log::warning('Invalid reset attempt', ['ip' => $request->ip()]);
+            return redirect('/');
+        }
+
+        return view('auth.reset-password', ['token' => $token, 'email' => $email]);
     }
 
     public function reset(Request $request)
     {
-        Log::info('Processing password reset', ['email' => $request->email]);
-
-        // Input validation
-        $request->validate([
-            'token' => 'required',
+        $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => [
-                'required',
-                'confirmed',
+                'required', 
+                'confirmed', 
                 'min:10',
                 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{10,}$/',
-                Rules\Password::defaults(),
             ],
+        ], [
+            'password.required' => 'Password is required.',
+            'password.confirmed' => 'Password confirmation does not match.',
+            'password.min' => 'Password must be at least 10 characters long.',
+            'password.regex' => 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.',
         ]);
 
-        // Fetch user from the database
-        $email = filter_var($request->email, FILTER_SANITIZE_EMAIL);
-        $user = User::where('email', $email)->first();
-        if (!$user) {
-            Log::warning('User not found during password reset', ['email' => $email]);
-            return back()->withErrors(['email' => __('The provided email is incorrect.')]);
+        if ($validator->fails()) {
+            return view('auth.reset-password', ['email' => $request->email])->withErrors($validator)->withInput($request->except('password', 'password_confirmation'));
         }
 
-        Log::info('User found for password reset', ['user_id' => $user->id]);
+        try {
+            $email = $request->email;
+            $token = $request->cookie('password_reset_token');
 
-        // Reset the password with sal 
-        $user->password = Hash::make($user->salt . $request->password);
-        $user->reset_token = null;
-        $user->reset_token_expires_at = null;
-        $user->locked_until = null;
-        $user->save();
+            $user = User::where('email', $email)->first();
+            if (!$user) {
+                throw ValidationException::withMessages(['email' => 'The provided email is incorrect.']);
+            }
 
-        Log::info('Password successfully reset', ['user_id' => $user->id]);
+            if (!$token || !$this->validateResetToken($token, $user->id, $user->salt)) {
+                Log::warning('Invalid token used for password reset', ['ip' => $request->ip()]);
+                throw ValidationException::withMessages(['email' => 'Invalid or expired token used for password reset.']);
+            }
 
-        return redirect()->route('login')->with('status', __('Your password has been reset!'));
-    }
+            $user->password = Hash::make($user->salt . $request->password);
+            $user->locked_until = null;
+            $user->save();
+
+            Log::info('Password successfully reset', ['user_id' => $user->id]);
+
+            Cookie::queue(Cookie::forget('password_reset_token'));
+
+            return redirect()->route('login')->with('status', 'Your password has been reset!');
+
+        } catch (ValidationException $e) {
+            return back()
+                ->withErrors($e->errors())
+                ->withInput($request->except('password', 'password_confirmation'));
+        } catch (\Exception $e) {
+            Log::error('Unexpected error during password reset: ' . $e->getMessage());
+            return back()
+                ->withErrors(['unexpected' => 'An unexpected error occurred. Please try again.'])
+                ->withInput($request->except('password', 'password_confirmation'));
+        }
+    }  
 
     protected function verifyKBAAnswersForUser($user, $answers)
     {
-        Log::info('Verifying KBA answers for user', ['user_id' => $user->id]);
-
-        // Hash answers with salt
-        $correctAnswer1 = hash('sha256', $user->salt . $user->answer_1);
-        $correctAnswer2 = hash('sha256', $user->salt . $user->answer_2);
-        $correctAnswer3 = hash('sha256', $user->salt . $user->answer_3);
-
         $providedAnswer1 = hash('sha256', $user->salt . filter_var($answers['answer_1'], FILTER_SANITIZE_STRING));
         $providedAnswer2 = hash('sha256', $user->salt . filter_var($answers['answer_2'], FILTER_SANITIZE_STRING));
         $providedAnswer3 = hash('sha256', $user->salt . filter_var($answers['answer_3'], FILTER_SANITIZE_STRING));
-
-        Log::info('Security input', [
-            'answer_1' => $user->answer_1,
-            'filter_answer_1' => filter_var($answers['answer_1'], FILTER_SANITIZE_STRING)
-        ]);
-        // Logging the comparison for debugging
-        Log::info('Comparing KBA answers', [
-            'correct_answer_1' => $correctAnswer1,
-            'provided_answer_1' => $providedAnswer1,
-            'correct_answer_2' => $correctAnswer2,
-            'provided_answer_2' => $providedAnswer2,
-            'correct_answer_3' => $correctAnswer3,
-            'provided_answer_3' => $providedAnswer3,
-        ]);
 
         return hash_equals($user->answer_1, $providedAnswer1) &&
                hash_equals($user->answer_2, $providedAnswer2) &&
                hash_equals($user->answer_3, $providedAnswer3);
     }
 
-    protected function generateResetToken($user)
+    protected function generateResetToken($userId, $salt)
     {
-        $token = Str::random(10);
-        $user->reset_token = Hash::make($token);
-        $user->reset_token_expires_at = now()->addMinutes(30);
-        $user->save();
-
-        Log::info('Reset token stored for user', ['user_id' => $user->id]);
-
-        return $token;
+        $token = Hash::make($salt . $userId);
+        $encryptedToken = encrypt($token);
+        
+        return cookie('password_reset_token', $encryptedToken, $this->tokenExpiration, null, null, true, true);
     }
 
-    protected function getIpAddress()
+    protected function validateResetToken($encryptedToken, $id, $salt)
     {
-        $ip = request()->ip();
-        Log::info('User IP address', ['ip' => $ip]);
-        return $ip;
+        try {
+            $token = decrypt($encryptedToken);
+            return Hash::check($salt . $id, $token);
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 
     protected function lockoutUser($email)

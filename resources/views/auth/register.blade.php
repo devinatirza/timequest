@@ -64,7 +64,7 @@
                     @for ($i = 1; $i <= 3; $i++)
                         <div>
                             <label for="answer_{{ $i }}" class="block text-2sm font-display text-subheading-gold">{{ $kbaQuestions[$i] }}</label>
-                            <input id="answer_{{ $i }}" name="answer_{{ $i }}" type="text" required class="appearance-none rounded-md relative block w-full px-3 py-2 border border-logo-gold bg-white placeholder-gray-400 text-text-brown focus:outline-none focus:ring-2 focus:ring-logo-gold focus:border-transparent focus:z-10 sm:text-sm transition duration-300 ease-in-out" placeholder="Your answer" value="{{old("answer_" . $i)}}">
+                            <input id="answer_{{ $i }}" name="answer_{{ $i }}" type="text" autocomplete="off" required class="appearance-none rounded-md relative block w-full px-3 py-2 border border-logo-gold bg-white placeholder-gray-400 text-text-brown focus:outline-none focus:ring-2 focus:ring-logo-gold focus:border-transparent focus:z-10 sm:text-sm transition duration-300 ease-in-out" placeholder="Your answer" value="{{old("answer_" . $i)}}">
                             @error("answer_$i")
                                 <p class="text-error-text text-sm mt-1">{{ $message }}</p>
                             @enderror

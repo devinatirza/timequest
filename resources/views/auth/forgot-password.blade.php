@@ -34,8 +34,7 @@
                                 {{ $question }}
                             </label>
                             <div class="mt-1">
-                                <input id="answer_{{ $loop->iteration }}" name="answer_{{ $loop->iteration }}" type="text" required
-                                       class="appearance-none block w-full px-3 py-2 border border-logo-gold bg-black bg-opacity-50 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-logo-gold focus:border-logo-gold sm:text-sm text-menu-text">
+                                <input id="answer_{{ $loop->iteration }}" name="answer_{{ $loop->iteration }}" type="text" autocomplete="off" required class="appearance-none block w-full px-3 py-2 border border-logo-gold bg-black bg-opacity-50 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-logo-gold focus:border-logo-gold sm:text-sm text-menu-text">
                             </div>
                         </div>
                     @endforeach

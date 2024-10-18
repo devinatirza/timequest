@@ -117,7 +117,7 @@ class RegisteredUserController extends Controller
                     ]);
                 }
             } else {
-                $imagePath = 'default-picture.jpg';
+                $imagePath = null;
             }
 
             $sanitized = [

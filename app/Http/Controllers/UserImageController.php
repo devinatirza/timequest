@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class UserImageController extends Controller
 {
@@ -12,15 +12,36 @@ class UserImageController extends Controller
     {
         $user = Auth::user();
         if (!$user || ($user->id != $userId && !$user->isAdmin())) {
+            Log::warning('Unauthorized image access attempt', ['userId' => $userId, 'requestedBy' => $user ? $user->id : 'guest']);
             abort(403);
         }
+        
+        $path = 'user_profiles/' . $filename;
+        $fullPath = Storage::disk('private')->path($path);
 
-        $path = storage_path('app/private/user_profiles/' . $filename);
+        if (!Storage::disk('private')->exists($path)) {
+            Log::warning('User image file not found', ['path' => $fullPath, 'exists' => file_exists($fullPath)]);
+            return $this->serveDefaultImage();
+        }
+        
+        return Storage::disk('private')->response($path, $filename, [
+            'Cache-Control' => 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0',
+            'Pragma' => 'no-cache',
+            'Expires' => '0',
+        ]);
+    }
 
-        if (!Storage::disk('private')->exists('user_profiles/' . $filename)) {
+    private function serveDefaultImage()
+    {
+        $defaultPath = public_path('images/default-profile.jpg');
+        if (!file_exists($defaultPath)) {
+            Log::error('Default image not found', ['path' => $defaultPath]);
             abort(404);
         }
-
-        return response()->file($path);
+        return response()->file($defaultPath, [
+            'Cache-Control' => 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0',
+            'Pragma' => 'no-cache',
+            'Expires' => '0',
+        ]);
     }
 }
