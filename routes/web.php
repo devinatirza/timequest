@@ -13,6 +13,11 @@ Route::get('/', function () {
     return view('home');
 });
 
+use App\Http\Controllers\ProductController;
+
+Route::get('/catalog', [ProductController::class, 'index'])->name('catalog');
+Route::post('/wishlist/{productId}', [ProductController::class, 'toggleWishlist'])->name('wishlist.toggle');
+
 Route::get('/about', function () {
     return view('about');
 });

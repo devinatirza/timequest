@@ -4,17 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Str;
+use Illuminate\Support\Str;
 
-class Product extends Model
+class Brand extends Model
 {
-    protected $fillable = [
-        'name', 
-        'description', 
-        'price', 
-        'image_path',
-        'brand_id'
-    ];
+    use HasFactory;
+
+    protected $fillable = ['name'];
 
     protected $keyType = 'string';
     public $incrementing = false;
@@ -28,13 +24,8 @@ class Product extends Model
         });
     }
 
-    public function brand()
+    public function products()
     {
-        return $this->belongsTo(Brand::class);
-    }
-
-    public function wishlists()
-    {
-        return $this->hasMany(Wishlist::class);
+        return $this->hasMany(Product::class);
     }
 }
