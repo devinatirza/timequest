@@ -16,9 +16,10 @@ module.exports = {
           'button-bg': '#D4AF37',
           'button-text': '#1C1814',
           'error-text' : '#EE6B6E',
-          'button-red' : '#ef4444',
+          'button-red' : '#EF4444',
           'button-red-hover' : '#b91c1c',
-          'white' : '#FFFFFF'
+          'white' : '#FFFFFF',
+          'black' : '#000000'
         },
         fontFamily: {
           'display': ['Cinzel', 'serif'],

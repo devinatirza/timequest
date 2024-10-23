@@ -5,21 +5,26 @@
     <div class="max-w-7xl mx-auto">
         <h1 class="text-5xl font-display font-bold text-logo-gold text-center mb-12">Exquisite Timepieces</h1>
         
-        <div class="mb-8 flex justify-center gap-4">
-            <a href="{{ route('catalog') }}" class="w-dvw sm:w-1/4 lg:w-1/6 px-2 py-4 border-2 border-subheading-gold bg-subheading-gold text-white rounded-full text-center cursor-pointer transition-all duration-300 {{ request('brand') == '' ? 'bg-logo-gold text-black border-subheading-gold' : 'hover:bg-logo-gold hover:text-black' }}">
-                All Brands
+        <div class="mb-8 flex justify-center">
+            <a href="{{ route('catalog') }}" class="w-auto sm:w-1/4 lg:w-1/6 px-2 flex">
+                <div class="w-full py-4 border-2 border-logo-gold text-white bg-transparent rounded-full text-center cursor-pointer transition-all duration-300 flex items-center justify-center {{ request('brand') == '' ? 'bg-logo-gold text-black border-subheading-gold' : 'hover:bg-logo-gold hover:text-black' }}">
+                    All Products
+                </div>
             </a>
             @foreach($brands as $brand)
-                <a href="{{ route('catalog', ['brand' => $brand->id]) }}" class="w-full sm:w-1/4 lg:w-1/6 px-4 py-4 border-2 border-logo-gold text-white bg-transparent rounded-full text-center cursor-pointer transition-all duration-300 {{ request('brand') == $brand->id ? 'bg-logo-gold text-black border-subheading-gold' : 'hover:bg-logo-gold hover:text-black' }}">
+            <a href="{{ route('catalog', ['brand' => $brand->id]) }}" class="w-auto sm:w-1/4 lg:w-1/6 px-2 flex">
+                <div class="w-full py-4 border-2 border-logo-gold text-white bg-transparent rounded-full text-center cursor-pointer transition-all duration-300 flex items-center justify-center {{ request('brand') == $brand->id ? 'bg-logo-gold text-black border-subheading-gold' : 'hover:bg-logo-gold hover:text-black' }}">
                     {{ $brand->name }}
-                </a>
+                </div>
+            </a>
+
             @endforeach
         </div>
 
-        <form action="{{ route('catalog') }}" method="GET" class="flex h-[500">
+        <form action="{{ route('catalog') }}" method="GET">
             <div class="flex shadow-lg">
                 <input type="text" name="search" placeholder="Search by name" value="{{ request('search') }}"
-                       class="w-dvw sm:w-64 px-4 py-2 border border-logo-gold bg-black bg-opacity-50 rounded-l-lg text-menu-text focus:outline-none focus:ring-2 focus:ring-logo-gold transition-shadow duration-300">
+                       class="w-full px-4 py-2 border border-logo-gold bg-black bg-opacity-50 rounded-l-lg text-menu-text focus:outline-none focus:ring-2 focus:ring-logo-gold transition-shadow duration-300">
                 <button type="submit" class="bg-logo-gold text-button-text px-4 py-2 rounded-r-lg hover:bg-subheading-gold transition-colors duration-300">
                     Search
                 </button>
