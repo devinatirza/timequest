@@ -34,8 +34,10 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             @foreach($products as $product)
             <div class="relative group">
-                <div class="bg-black bg-opacity-50 rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 group-hover:scale-105">
-                    <img src="{{ asset('storage/' . $product->image_path) }}" alt="{{ $product->name }}" class="w-full h-64 object-cover">
+                <div class="bg-black bg-opacity-50 rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 group-hover:scale-105 flex flex-col h-full">
+                    <div class="aspect-square flex h-2">
+                        <img src="{{ asset($product->image_path) }}" alt="{{ $product->name }}" class="object-cover">
+                    </div>
                     <div class="p-4">
                         <h2 class="text-xl font-bold text-logo-gold">{{ $product->name }}</h2>
                         <p class="text-subheading-gold">${{ number_format($product->price, 2) }}</p>
