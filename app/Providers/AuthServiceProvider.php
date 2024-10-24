@@ -32,15 +32,3 @@ class AuthServiceProvider extends ServiceProvider
     }
 }
 
-class WishlistPolicy
-{
-    public function view(User $user, Wishlist $wishlist)
-    {
-        return $user->id === $wishlist->user_id;
-    }
-
-    public function delete(User $user, Wishlist $wishlist)
-    {
-        return $user->id === $wishlist->user_id;
-    }
-}

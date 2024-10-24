@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Wishlist extends Model
 {
+    public $incrementing = false;
+    protected $primaryKey = 'product_id';
     protected $fillable = [
         'user_id',
         'product_id'

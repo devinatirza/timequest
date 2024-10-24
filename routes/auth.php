@@ -13,6 +13,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserImageController;
+use App\Http\Controllers\WishlistController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -45,8 +46,9 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::post('/wishlist/{productId}', [ProductController::class, 'toggleWishlist'])->name('wishlist.toggle');
-
+    Route::post('/wishlist/{product}', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
+    Route::delete('/wishlist/{product}', [WishlistController::class, 'remove'])->name('wishlist.remove');
+    
     Route::get('verify-email', EmailVerificationPromptController::class)
         ->name('verification.notice');
     Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)

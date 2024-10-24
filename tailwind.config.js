@@ -21,6 +21,10 @@ module.exports = {
           'white' : '#FFFFFF',
           'black' : '#000000'
         },
+        borderColor: {
+          'logo-gold': '#D4AF37',  
+          'error-text': '#EE6B6E',  
+        },
         fontFamily: {
           'display': ['Cinzel', 'serif'],
           'serif': ['Cormorant', 'serif'],

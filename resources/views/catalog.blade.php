@@ -29,7 +29,13 @@
                 </button>
             </div>
         </form>
-
+        @php
+        if(Auth::check()){
+            $user = Auth::user();
+            $wishlists = $user->wishlists;
+        }
+        @endphp
+        
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             @foreach($products as $product)
             <div class="relative group">
@@ -47,7 +53,14 @@
                             <p class="text-white mb-4">{{ $product->description }}</p>
                             @if (Auth::check())
                                 <button onclick="toggleWishlist('{{ $product->id }}')" class="bg-logo-gold text-button-text px-4 py-2 rounded hover:bg-subheading-gold transition-colors duration-300">
-                                    Add to Wishlist
+                                    @php
+                                    if($wishlists->count() > 0 && $wishlists->contains($product)){
+                                        echo "Remove from Wishlists";
+                                    }
+                                    else{
+                                        echo "Add to Wishlists";
+                                    }
+                                    @endphp
                                 </button>
                             @else
                                 <button onclick="showLoginPrompt()" class="bg-logo-gold text-button-text px-4 py-2 rounded hover:bg-subheading-gold transition-colors duration-300">
@@ -155,9 +168,16 @@ function toggleWishlist(productId) {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
         },
+        body: JSON.stringify({ 
+            product_id: productId
+        }),
         credentials: 'same-origin'
     })
-    .then(response => response.json())
+    .then(response => {
+        if(response.ok){
+            window.location.reload()
+        }
+    })
     .then(data => {
         if (data.error) {
             alert(data.error);
