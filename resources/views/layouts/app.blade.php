@@ -20,8 +20,9 @@
 </head>
 <body class="bg-navbar-bg text-menu-text">
     @include('components.navbar')
-    <main>
+    <main class="min-h-screen">
         @yield('content')
+        @stack('scripts')
     </main>
     <script src="{{ mix('js/app.js') }}"></script>
 </body>

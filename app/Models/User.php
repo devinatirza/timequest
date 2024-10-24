@@ -41,6 +41,7 @@ class User extends Authenticatable
         'answer_1',
         'answer_2',
         'answer_3',
+        'is_admin'
     ];
 
     /**

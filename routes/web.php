@@ -1,22 +1,22 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserImageController;
-use App\Http\Requests\Auth\LoginController;
+use App\Http\Requests\Auth\LoginController; 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\ProductController;
 
 Route::get('/', function () {
     return view('home');
 });
 
-use App\Http\Controllers\ProductController;
-
 Route::get('/catalog', [ProductController::class, 'index'])->name('catalog');
-Route::post('/wishlist/{productId}', [ProductController::class, 'toggleWishlist'])->name('wishlist.toggle');
+
 
 Route::get('/about', function () {
     return view('about');
@@ -38,12 +38,44 @@ Route::middleware(['guest'])->group(function () {
 });
 
 
-Route::get('/profile', function () {
-    if (Auth::check()) {
-        return redirect()->route('profile');
-    }
-    return redirect()->route('login');
-})->name('profile');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
+});
 
+
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('products', AdminProductController::class);
+});
+
+Route::prefix('admin')
+    ->name('admin.')
+    ->middleware(['auth', 'admin'])
+    ->group(function () {
+        Route::get('/dashboard', [AdminProductController::class, 'index'])
+            ->name('dashboard');
+            
+            Route::get('/products/create', [AdminProductController::class, 'create'])
+            ->name('products.create');
+            
+        Route::post('/products', [AdminProductController::class, 'store'])
+            ->name('products.store');
+            
+        Route::get('/products/{product}/edit', [AdminProductController::class, 'edit'])
+            ->name('products.edit');
+            
+        Route::put('/products/{product}', [AdminProductController::class, 'update'])
+            ->name('products.update');
+            
+        Route::delete('/products/{product}', [AdminProductController::class, 'destroy'])
+            ->name('products.destroy');
+});
+
+Route::fallback(function () {
+    if (request()->is('admin/*')) {
+        return redirect()->route('login')
+            ->with('error', 'Unauthorized access.');
+    }
+    return abort(404);
+});
 
 require __DIR__.'/auth.php';

@@ -24,6 +24,7 @@ return new class extends Migration
             $table->text("answer_1");
             $table->text("answer_2");
             $table->text("answer_3");
+            $table->boolean('is_admin')->default(false);
             $table->rememberToken();
             $table->timestamps();
         });
