@@ -59,4 +59,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Product::class, 'wishlists');
     }
+
+    public function isAdmin()
+    {
+        return $this->is_admin;
+    }
 }

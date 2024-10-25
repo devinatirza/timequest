@@ -13,7 +13,7 @@ use App\Http\Controllers\ProductController;
 
 Route::get('/', function () {
     return view('home');
-});
+})->name("home");
 
 Route::get('/catalog', [ProductController::class, 'index'])->name('catalog');
 
@@ -43,9 +43,9 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::resource('products', AdminProductController::class);
-});
+// Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+//     Route::resource('products', AdminProductController::class);
+// });
 
 Route::prefix('admin')
     ->name('admin.')
@@ -54,7 +54,7 @@ Route::prefix('admin')
         Route::get('/dashboard', [AdminProductController::class, 'index'])
             ->name('dashboard');
             
-            Route::get('/products/create', [AdminProductController::class, 'create'])
+            Route::get('/create', [AdminProductController::class, 'create'])
             ->name('products.create');
             
         Route::post('/products', [AdminProductController::class, 'store'])

@@ -21,7 +21,7 @@ class AdminProductController extends Controller
         $this->middleware(function ($request, $next) {
             $key = 'admin-actions:' . $request->ip();
             
-            if (RateLimiter::tooManyAttempts($key, 5)) { 
+            if (RateLimiter::tooManyAttempts($key, 10)) { 
                 Log::warning('Rate limit exceeded for admin actions', [
                     'ip' => $request->ip(),
                     'admin_id' => auth()->id(),
@@ -63,18 +63,18 @@ class AdminProductController extends Controller
     public function index()
     {
         try {
-            $products = Product::with('brand')->get();
-            return view('admin.products.index', compact('products'));
+            $products = Product::with('brand')->paginate(10);
+            return view('admin.dashboard', compact('products'));
         } catch (\Exception $e) {
             Log::error('Error loading products dashboard: ' . $e->getMessage());
             return back()->with('error', 'Failed to load products. Please try again.');
         }
     }
-
+    
     public function create()
     {
         $brands = Brand::all();
-        return view('admin.products.create', compact('brands'));
+        return view('admin.create', compact('brands'));
     }
 
     public function store(Request $request)
@@ -218,7 +218,7 @@ class AdminProductController extends Controller
 
     public function edit(Product $product)
     {
-        return view('admin.products.edit', compact('product'));
+        return view('admin.edit', compact('product'));
     }
 
     public function update(Request $request, Product $product)

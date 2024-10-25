@@ -5,14 +5,41 @@
                 <a href="/" style="font-family: 'Playfair Display', serif; color: #FFD700; font-size: 1.65rem; font-weight: bold; letter-spacing: 0.05em;">TimeQuest</a>
             </div>
             <div style="display: flex; gap: 2rem;">
-                @foreach(['Home', 'Catalog', 'About', 'Profile'] as $item)
-                <a href="{{ strtolower($item) === 'home' ? '/' : '/' . strtolower($item) }}"
-                    style="color: #FFF8DC; font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 500; transition: all 0.3s ease-in-out; position: relative; padding-bottom: 0.25rem;"
-                    onmouseover="this.style.color='#FFD700'"
-                    onmouseout="this.style.color='#FFF8DC'">
-                    {{ $item }}
-                </a>
-                @endforeach
+                @auth
+                @if(auth()->user()->isAdmin())
+                        <a href="{{ route('admin.dashboard') }}"
+                            style="color: #FFF8DC; font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 500; transition: all 0.3s ease-in-out; position: relative; padding-bottom: 0.25rem;"
+                            onmouseover="this.style.color='#FFD700'"
+                            onmouseout="this.style.color='#FFF8DC'">
+                            Dashboard
+                        </a>
+                        <a href="{{ route('admin.products.create') }}"
+                            style="color: #FFF8DC; font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 500; transition: all 0.3s ease-in-out; position: relative; padding-bottom: 0.25rem;"
+                            onmouseover="this.style.color='#FFD700'"
+                            onmouseout="this.style.color='#FFF8DC'">
+                            Add Product
+                        </a>
+                        <a href="{{ route('logout') }}"
+                            style="color: #FFF8DC; font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 500; transition: all 0.3s ease-in-out; position: relative; padding-bottom: 0.25rem;"
+                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+                            onmouseover="this.style.color='#FFD700'"
+                            onmouseout="this.style.color='#FFF8DC'">
+                            Logout
+                        </a>
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
+                            @csrf
+                        </form>
+                @endif
+                @else
+                    @foreach(['Home', 'Catalog', 'About', 'Profile'] as $item)
+                            <a href="{{ strtolower($item) === 'home' ? '/' : '/' . strtolower($item) }}"
+                                style="color: #FFF8DC; font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 500; transition: all 0.3s ease-in-out; position: relative; padding-bottom: 0.25rem;"
+                                onmouseover="this.style.color='#FFD700'"
+                                onmouseout="this.style.color='#FFF8DC'">
+                                {{ $item }}
+                            </a>
+                    @endforeach
+                @endauth
             </div>
         </div>
     </div>

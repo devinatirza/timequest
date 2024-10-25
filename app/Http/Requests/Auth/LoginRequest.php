@@ -22,14 +22,6 @@ class LoginRequest extends FormRequest
         return true;
     }
 
-    public function rules(): array
-    {
-        return [
-            'email' => ['required', 'string', 'email'],
-            'password' => ['required', 'string'],
-        ];
-    }
-
     protected function findUser(): ?User
     {
         $email = $this->sanitizeInput($this->input('email'));
@@ -58,14 +50,13 @@ class LoginRequest extends FormRequest
         }
 
         $this->loginUser($user);
+        $this->handlePostLoginRedirect($user);
     }
 
     protected function checkPassword(User $user, string $password): bool
     {
         $saltedPassword = $user->salt . $password;
-        $result = Hash::check($saltedPassword, $user->password);
-
-        return $result;
+        return Hash::check($saltedPassword, $user->password);
     }
 
     protected function loginUser(User $user): void
@@ -117,4 +108,14 @@ class LoginRequest extends FormRequest
             Log::warning('User account locked', ['user_id' => $user->id, 'ip' => $this->ip()]);
         }
     }
+
+    protected function handlePostLoginRedirect(User $user): void
+    {
+        if ($user->isAdmin()){
+            redirect()->intended(route('admin.dashboard'));
+        } else {
+            redirect()->intended(route('home'));
+        }
+    }
+
 }

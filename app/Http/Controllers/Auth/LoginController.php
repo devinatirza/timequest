@@ -16,24 +16,24 @@ class LoginController extends Controller
         return view('auth.login');
     }
 
-    public function login(LoginRequest $request)
-    {
-        $request->authenticate();
+    // public function login(LoginRequest $request)
+    // {
+    //     $request->authenticate();
 
-        $request->session()->regenerate();
+    //     $request->session()->regenerate();
 
-        return redirect()->intended('about');
-    }
+    //     return redirect()->intended('');
+    // }
 
-    public function logout(Request $request)
-    {
-        Auth::logout();
+    // public function logout(Request $request)
+    // {
+    //     Auth::logout();
 
-        $request->session()->invalidate();
+    //     $request->session()->invalidate();
 
-        $request->session()->regenerateToken();
+    //     $request->session()->regenerateToken();
 
-        return redirect('/');
-    }
+    //     return redirect('/');
+    // }
 
 }
