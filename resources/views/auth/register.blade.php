@@ -30,7 +30,6 @@
 
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-                <!-- Left Column -->
                 <div class="space-y-6">
                     <div>
                         <label for="name" class="block text-2sm font-display text-subheading-gold">Name</label>
@@ -59,7 +58,6 @@
                     </div>
                 </div>
                 
-                <!-- Right Column - Security Questions -->
                 <div class="space-y-6">
                     @for ($i = 1; $i <= 3; $i++)
                         <div>
@@ -85,11 +83,11 @@
             </div>
         </form>
 
-        <div class="mt-2">
+        <div>
             <div class="relative">
                 <div class="relative flex justify-center text-sm">
                     <a href="{{ route('login') }}"
-                        class="px-2 bg-black bg-opacity-50 text-text-white">
+                        class="px-2 text-text-white">
                         Already have an account? Sign in
                     </a>
                 </div>

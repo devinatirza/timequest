@@ -5,8 +5,7 @@
                 <a href="/" style="font-family: 'Playfair Display', serif; color: #FFD700; font-size: 1.65rem; font-weight: bold; letter-spacing: 0.05em;">TimeQuest</a>
             </div>
             <div style="display: flex; gap: 2rem;">
-                @auth
-                @if(auth()->user()->isAdmin())
+                @if(Auth::check() && auth()->user()->isAdmin())
                         <a href="{{ route('admin.dashboard') }}"
                             style="color: #FFF8DC; font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 500; transition: all 0.3s ease-in-out; position: relative; padding-bottom: 0.25rem;"
                             onmouseover="this.style.color='#FFD700'"
@@ -28,9 +27,8 @@
                         </a>
                         <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
                             @csrf
-                        </form>
-                @endif
-                @else
+                        </form> 
+                @else 
                     @foreach(['Home', 'Catalog', 'About', 'Profile'] as $item)
                             <a href="{{ strtolower($item) === 'home' ? '/' : '/' . strtolower($item) }}"
                                 style="color: #FFF8DC; font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 500; transition: all 0.3s ease-in-out; position: relative; padding-bottom: 0.25rem;"
@@ -39,7 +37,7 @@
                                 {{ $item }}
                             </a>
                     @endforeach
-                @endauth
+                @endif
             </div>
         </div>
     </div>

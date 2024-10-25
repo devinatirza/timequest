@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
@@ -67,4 +68,33 @@ Route::middleware('auth')->group(function () {
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
+});
+
+
+Route::prefix('admin')
+    ->name('admin.')
+    ->middleware(['auth', 'admin'])
+    ->group(function () {
+        Route::get('/dashboard', [AdminProductController::class, 'index'])
+            ->name('dashboard');
+            
+        Route::get('/create', [AdminProductController::class, 'create'])
+            ->middleware('throttle:10,1')
+            ->name('products.create');
+            
+        Route::post('/products', [AdminProductController::class, 'store'])
+            ->middleware('throttle:10,1')
+            ->name('products.store');
+            
+        Route::get('/products/{product}/edit', [AdminProductController::class, 'edit'])
+            ->middleware('throttle:10,1')
+            ->name('products.edit');
+            
+        Route::put('/products/{product}', [AdminProductController::class, 'update'])
+            ->middleware('throttle:10,1')
+            ->name('products.update');
+            
+        Route::delete('/products/{product}', [AdminProductController::class, 'destroy'])
+            ->middleware('throttle:10,1')    
+            ->name('products.destroy');
 });

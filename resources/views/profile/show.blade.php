@@ -4,7 +4,6 @@
 <div class="min-h-screen bg-navbar-bg py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">
         <div class="flex flex-row md:flex-row gap-8">
-            <!-- Left Side - Profile -->
             <div class="w-1/4">
                 <div class="bg-black bg-opacity-50 rounded-lg shadow-lg p-6 border border-logo-gold/30">
                     <div class="flex justify-center mb-6">
@@ -26,6 +25,7 @@
                             Edit Profile
                         </a>
                     </div>
+                    
                     <div class="mt-4">
                         <a href="{{ route('logout') }}"
                            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
@@ -36,10 +36,15 @@
                             @csrf
                         </form>
                     </div>
+
+                    <div class="mt-4">
+                        <button onclick="showDeleteModal()" class="text-red-600 hover:text-red-400 transition-colors duration-200 font-bold">
+                            Delete Account
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <!-- Right Side - Wishlist -->
             <div class="w-3/4">
                 <h2 class="text-2xl font-bold text-logo-gold mb-6">Your Wishlist</h2>
                 @if($user->wishlists->count() > 0)
@@ -82,6 +87,28 @@
     </div>
 </div>
 
+<div id="deleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 hidden">
+    <div class="bg-black bg-opacity-80 p-8 rounded-lg max-w-md w-full border border-logo-gold shadow-lg text-center">
+        <h2 class="text-3xl font-bold text-logo-gold mb-2">Confirm Account Deletion</h2>
+        <p class="text-white mb-6">Please enter your password to confirm.</p>
+        <form action="{{ route('profile.destroy') }}" method="POST">
+            @csrf
+            @method('DELETE')
+
+            <input type="password" name="password" id="password" required
+                   class="mt-1 w-full px-4 py-2 border border-logo-gold bg-black bg-opacity-50 rounded-lg text-menu-text focus:outline-none focus:ring-2 focus:ring-logo-gold transition-shadow duration-300">
+            @error('password', 'userDeletion')
+                <p class="text-sm text-error-text mt-1">{{ $message }}</p>
+            @enderror
+
+            <div class="mt-6 flex justify-center space-x-8">
+                <button type="button" onclick="closeDeleteModal()" class="px-16 py-2 border-2 border-logo-gold text-logo-gold rounded-lg hover:bg-logo-gold hover:text-black transition-all duration-300">Cancel</button>
+                <button type="submit" class="px-12 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-300">Confirm Delete</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
 function removeFromWishlist(productId) {
     if(!confirm('Are you sure you want to remove this item from your wishlist?')) return;
@@ -102,5 +129,28 @@ function removeFromWishlist(productId) {
     })
     .catch(error => console.error('Error:', error));
 }
+
+function showDeleteModal() {
+    document.getElementById('deleteModal').classList.remove('hidden');
+}
+
+function closeDeleteModal() {
+    document.getElementById('password').value = ''; 
+    document.querySelector('.text-error-text')?.remove(); 
+
+    document.getElementById('deleteModal').classList.add('hidden');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    @if(session('showDeleteModal'))
+        showDeleteModal();
+    @endif
+});
+
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeDeleteModal();
+    }
+});
 </script>
 @endsection

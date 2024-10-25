@@ -5,13 +5,15 @@
     <div class="w-full"> 
     <h1 class="text-5xl font-display font-bold text-logo-gold text-center mb-6">Products</h1>
 
-        <div class="flex shadow-lg mb-8">
-                <input type="text" name="search" placeholder="Search by name" value="{{ request('search') }}"
-                       class="w-full px-4 py-2 border border-logo-gold bg-black bg-opacity-50 rounded-l-lg text-menu-text focus:outline-none focus:ring-2 focus:ring-logo-gold transition-shadow duration-300">
-                <button type="submit" class="bg-logo-gold text-button-text px-4 py-2 rounded-r-lg hover:bg-subheading-gold transition-colors duration-300">
-                    Search
-                </button>
+    <form action="{{ route('admin.dashboard') }}" method="GET" class="mb-8">
+        <div class="flex shadow-lg">
+            <input type="text" name="search" placeholder="Search by name" value="{!! old('search', request('search')) !!}"
+                    class="w-full px-4 py-2 border border-logo-gold bg-black bg-opacity-50 rounded-l-lg text-menu-text focus:outline-none focus:ring-2 focus:ring-logo-gold transition-shadow duration-300">
+            <button type="submit" class="bg-logo-gold text-button-text px-4 py-2 rounded-r-lg hover:bg-subheading-gold transition-colors duration-300">
+                Search
+            </button>
         </div>
+    </form>
 
         <div class="bg-black bg-opacity-50 rounded-lg shadow-lg p-6">
             <table class="w-full text-left divide-y divide-gray-700">
@@ -61,7 +63,7 @@
             </table>
 
             <div class="mt-6">
-                {{ $products->links() }}
+                {{ $products->appends(request()->input())->links('components.pagination') }}
             </div>
         </div>
     </div>

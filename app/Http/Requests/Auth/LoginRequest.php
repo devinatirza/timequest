@@ -11,6 +11,7 @@ use Illuminate\Validation\ValidationException;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 
 class LoginRequest extends FormRequest
 {
@@ -114,6 +115,7 @@ class LoginRequest extends FormRequest
         if ($user->isAdmin()){
             redirect()->intended(route('admin.dashboard'));
         } else {
+            Session::flash('login_success', 'Login successful! Welcome back.');
             redirect()->intended(route('home'));
         }
     }

@@ -9,6 +9,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use Log;
+use Illuminate\Support\Facades\Session;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -26,9 +28,16 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        \Log::info('User logged in: ' . Auth::user()->email);
+        if(auth()->user()->isAdmin())
+        {
+            Log::info('Admin logged in: ' . Auth::user()->email);
+            return redirect()->route('admin.dashboard');
+            
+        } 
 
-        return redirect()->intended(RouteServiceProvider::HOME);
+        Session::flash('login_success', 'Login successful! Welcome back.');
+
+        return redirect()->intended(default: '/');
     }
 
     public function destroy(Request $request): RedirectResponse

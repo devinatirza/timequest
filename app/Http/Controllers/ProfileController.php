@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -172,28 +173,42 @@ class ProfileController extends Controller
     public function destroy(Request $request): RedirectResponse
     {
         try {
+            // Validate that password is provided
             $request->validateWithBag('userDeletion', [
-                'password' => ['required', 'current_password'],
+                'password' => ['required', 'string'],
             ]);
-
+    
+            // Retrieve the authenticated user
             $user = $request->user();
-
+    
+            // Check if the provided password is correct using the custom checkPassword function
+            if (!$this->checkPassword($user, $request->input('password'))) {
+                // If the password check fails, log the attempt and return an error
+                Log::warning('Password mismatch during account deletion for user ID: ' . $user->id);
+                return redirect()->route('profile.destroy')->withErrors(['password' => 'The provided password is incorrect.'], 'userDeletion')->with('showDeleteModal', true);
+            }
+    
+            // Proceed with account deletion if the password is correct
             Log::warning('Account deletion initiated for user ID: ' . $user->id);
-
+    
             Auth::logout();
-
+    
+            // Delete user's image from storage if it exists
             if ($user->image_path && Storage::disk('private')->exists($user->image_path)) {
                 Storage::disk('private')->delete($user->image_path);
             }
-            
+    
+            // Delete the user
             $user->delete();
-
+    
+            // Invalidate the session and regenerate the CSRF token
             $request->session()->invalidate();
             $request->session()->regenerateToken();
-
+    
             Log::info('Account successfully deleted for user ID: ' . $user->id);
 
             return Redirect::to('/')->with('status', 'account-deleted');
+    
         } catch (ValidationException $e) {
             Log::warning('Failed account deletion attempt for user ID: ' . $request->user()->id);
             return back()->withErrors($e->errors())->withInput();
@@ -202,4 +217,14 @@ class ProfileController extends Controller
             return back()->withErrors(['unexpected' => 'An unexpected error occurred. Please try again.']);
         }
     }
+    
+    /**
+     * Custom password checking method with salt.
+     */
+    protected function checkPassword(User $user, string $password): bool
+    {
+        $saltedPassword = $user->salt . $password;
+        return Hash::check($saltedPassword, $user->password);
+    }
+    
 }

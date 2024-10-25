@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Intervention\Image\ImageManager;
@@ -21,7 +22,7 @@ class AdminProductController extends Controller
         $this->middleware(function ($request, $next) {
             $key = 'admin-actions:' . $request->ip();
             
-            if (RateLimiter::tooManyAttempts($key, 10)) { 
+            if (RateLimiter::tooManyAttempts($key, 15)) { 
                 Log::warning('Rate limit exceeded for admin actions', [
                     'ip' => $request->ip(),
                     'admin_id' => auth()->id(),
@@ -60,10 +61,26 @@ class AdminProductController extends Controller
         RateLimiter::hit($key, 300); 
     }
 
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $products = Product::with('brand')->paginate(10);
+            $search = $request->input('search', '');
+            $search = htmlspecialchars(strip_tags($search), ENT_QUOTES, 'UTF-8'); // Sanitize input
+
+            $validator = Validator::make(['search' => $search], [
+                'search' => 'nullable|string|max:255',
+            ]);
+
+            if ($validator->fails()) {
+                return redirect()->back()->withErrors($validator);
+            }
+
+            $products = Product::with('brand')
+                        ->when($search, function ($query, $search) {
+                            $query->where('name', 'like', '%' . $search . '%');
+                        })
+                        ->paginate(10);
+
             return view('admin.dashboard', compact('products'));
         } catch (\Exception $e) {
             Log::error('Error loading products dashboard: ' . $e->getMessage());
@@ -79,6 +96,7 @@ class AdminProductController extends Controller
 
     public function store(Request $request)
     {
+        Log::info($request->brand);
         try {
             $validated = $request->validate([
                 'name' => [
@@ -102,10 +120,7 @@ class AdminProductController extends Controller
                 ],
                 'brand' => [
                     'required',
-                    'string',
-                    'min:2',
-                    'max:255',
-                    'regex:/^[\pL\s\-0-9]+$/u'
+                    'exists:brands,id'
                 ],
                 'image' => [
                     'required',
@@ -122,7 +137,7 @@ class AdminProductController extends Controller
                 'price.numeric' => 'Price must be a valid number.',
                 'price.min' => 'Price cannot be negative.',
                 'brand.required' => 'Brand name is required.',
-                'brand.regex' => 'Brand name can only contain letters, numbers, spaces, and hyphens.',
+                'brand.exists' => 'Brand is not registered.',
                 'image.required' => 'Product image is required.',
                 'image.mimes' => 'Image must be a valid type (jpeg, jpg, png).',
                 'image.max' => 'Image size cannot exceed 2MB.'
@@ -155,7 +170,7 @@ class AdminProductController extends Controller
                     $image = $manager->read($tempPath);
 
                     $imageName = Str::uuid() . '.jpg';
-                    $imagePath = 'products/' . $imageName;
+                    $imagePath = 'images/watches/' . $imageName;
 
                     Storage::disk('public')->put(
                         $imagePath,
@@ -185,7 +200,7 @@ class AdminProductController extends Controller
                 'name' => strip_tags($validated['name']),
                 'description' => strip_tags($validated['description']),
                 'price' => round(floatval($validated['price']), 2),
-                'brand' => strip_tags($validated['brand']),
+                'brand_id' => $validated['brand'],
                 'image_path' => $imagePath
             ];
 
@@ -218,15 +233,16 @@ class AdminProductController extends Controller
 
     public function edit(Product $product)
     {
-        return view('admin.edit', compact('product'));
+        $brands = Brand::all();
+        return view('admin.edit', compact('product', 'brands'));
     }
 
     public function update(Request $request, Product $product)
     {
         try {
             $validated = $request->validate([
-                'name' => ['required', 'string', 'max:255'],
-                'description' => ['required', 'string'],
+                'name' => ['required', 'string', 'min:3', 'max:255'],
+                'description' => ['required', 'string', 'min:10'],
                 'price' => ['required', 'numeric', 'min:0'],
                 'brand_id' => ['required', 'exists:brands,id'],
                 'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
@@ -240,11 +256,11 @@ class AdminProductController extends Controller
                 $image = $manager->read($uploadedFile);
                 $image->cover(300, 300);
 
-                $path = 'user_profiles/' . $imageName;
-                Storage::disk('private')->put($path, $image->toJpeg(80));
+                $path = 'images/watches/' . $imageName;
+                Storage::disk('public')->put($path, $image->toJpeg(80));
 
                 if ($product->image_path) {
-                    Storage::disk('private')->delete($product->image_path);
+                    Storage::disk('public')->delete($product->image_path);
                 }
 
                 $validated['image_path'] = $path;
@@ -257,7 +273,7 @@ class AdminProductController extends Controller
                 'product_id' => $product->id
             ]);
 
-            return redirect()->route('admin.products.index')
+            return redirect()->route('admin.dashboard')
                 ->with('success', 'Product updated successfully.');
 
         } catch (\Exception $e) {
@@ -269,7 +285,7 @@ class AdminProductController extends Controller
 
             return back()
                 ->withInput()
-                ->withErrors(['error' => 'An error occurred while updating the product.']);
+                ->withErrors(['error' => $e->getMessage()]);
         }
     }
 
@@ -279,7 +295,7 @@ class AdminProductController extends Controller
 
         try {
             if ($product->image_path) {
-                Storage::disk('private')->delete($product->image_path);
+                Storage::disk('public')->delete($product->image_path);
             }
 
             $product->delete();

@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 use App\Constants\KbaQuestions;
@@ -29,6 +30,16 @@ class RegisteredUserController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $throttleKey = Str::lower($request->ip()) . '|' . Str::lower($request->input('email'));
+
+        if (RateLimiter::tooManyAttempts($throttleKey, 6)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            throw ValidationException::withMessages([
+                'email' => "Too many attempts. Please try again in $seconds seconds.",
+            ]);
+        }
+        RateLimiter::hit($throttleKey, 60);
+        
         try {
             $validated = $request->validate([
                 'name' => ['required', 'string', 'min:3', 'max:255', 'regex:/^[\pL\s\-]+$/u'],
@@ -55,7 +66,7 @@ class RegisteredUserController extends Controller
                 'password.required' => 'Password is required.',
                 'password.confirmed' => 'Password confirmation does not match.',
                 'password.min' => 'Password must be at least 10 characters long.',
-                'password.regex' => 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.',
+                'password.regex' => 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special characterfrom the set: @, $, !, %, *, ?, &.',
                 'answer_1.required' => 'Security answer 1 is required.',
                 'answer_1.min' => 'Security answer 1 must be at least 3 characters long.',
                 'answer_2.required' => 'Security answer 2 is required.',
@@ -149,7 +160,9 @@ class RegisteredUserController extends Controller
 
             Auth::login($user);
 
-            return redirect(RouteServiceProvider::HOME);
+            RateLimiter::clear($throttleKey);
+
+            return redirect('login');
 
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput($request->except('password', 'password_confirmation'));
