@@ -12,33 +12,43 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::with('brand');
+        $validated = $request->validate([
+            'brand' => 'nullable|exists:brands,id',
+            'search' => 'nullable|string|max:255'
+        ]);
     
-        if ($request->has('brand')) {
-            $brand = htmlspecialchars(strip_tags($request->input('brand')), ENT_QUOTES, 'UTF-8');
-            $query->where('brand_id', $brand);
-        }
+        $products = Product::with('brand')
+            ->when($validated['brand'] ?? null, function ($query, $brand) {
+                $query->where('brand_id', $brand);
+            })
+            ->when($validated['search'] ?? null, function ($query, $search) {
+                $query->where('name', 'like', '%' . $search . '%');
+            })
+            ->get();
     
-        if ($request->has('search')) {
-            $search = htmlspecialchars(strip_tags($request->input('search')), ENT_QUOTES, 'UTF-8');
-            
-            $validator = Validator::make(['search' => $search], [
-                'search' => 'nullable|string|max:255',
-            ]);
-    
-            if ($validator->fails()) {
-                return redirect()->back()->withErrors($validator);
-            }
-    
-            $query->where('name', 'like', '%' . $search . '%');
-        }
-    
-        $products = $query->get();
         $brands = Brand::all();
     
         return view('catalog', compact('products', 'brands'));
     }
     
+    public function fetchUpdates(Request $request)
+    {
+        $validated = $request->validate([
+            'brand' => 'nullable|exists:brands,id',
+            'search' => 'nullable|string|max:255'
+        ]);
+    
+        $products = Product::with('brand')
+            ->when($validated['brand'] ?? null, function ($query, $brand) {
+                $query->where('brand_id', $brand);
+            })
+            ->when($validated['search'] ?? null, function ($query, $search) {
+                $query->where('name', 'like', '%' . $search . '%');
+            })
+            ->get();
+    
+        return response()->json($products);
+    }    
 
     public function toggleWishlist(Request $request, $productId)
     {

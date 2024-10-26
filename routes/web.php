@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\ComparisonController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserImageController;
 use App\Http\Requests\Auth\LoginController; 
@@ -16,6 +17,8 @@ Route::get('/', function () {
 })->name("home");
 
 Route::get('/catalog', [ProductController::class, 'index'])->name('catalog');
+Route::get('/catalog/fetch-updates', [ProductController::class, 'fetchUpdates'])->name('catalog.fetchUpdates');
+Route::get('/compare-products', [ComparisonController::class, 'compare'])->name('compare.products');
 
 
 Route::get('/about', function () {

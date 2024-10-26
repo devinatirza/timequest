@@ -19,7 +19,9 @@ module.exports = {
           'button-red' : '#EF4444',
           'button-red-hover' : '#b91c1c',
           'white' : '#FFFFFF',
-          'black' : '#000000'
+          'black' : '#000000',
+          'button-gray' : '#A3A3A3',
+          'button-light-gray' : '#DBDBDB'
         },
         borderColor: {
           'logo-gold': '#D4AF37',  

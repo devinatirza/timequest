@@ -4,14 +4,14 @@
 <div class="min-h-screen bg-navbar-bg py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-3xl mx-auto">
     <div class="mb-8 flex">
-    <a href="{{ route('admin.dashboard') }}" 
-       class="text-logo-gold hover:bg-logo-gold hover:text-black font-bold py-2 px-4 rounded-full transition-all duration-300 inline-flex items-center">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7"/>
-        </svg>
-    </a>
-    <h1 class="text-5xl w-full text-center font-display font-bold text-logo-gold">Edit Product</h1>
-</div>
+        <a href="{{ route('admin.dashboard') }}" 
+            class="text-logo-gold hover:bg-logo-gold hover:text-black font-bold py-2 px-4 rounded-full transition-all duration-300 inline-flex items-center">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7"/>
+            </svg>
+        </a>
+        <h1 class="text-5xl w-full text-center font-display font-bold text-logo-gold">Edit Product</h1>
+    </div>
 
 
         @if (session('success'))

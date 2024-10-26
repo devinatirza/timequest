@@ -64,29 +64,29 @@ class AdminProductController extends Controller
     public function index(Request $request)
     {
         try {
-            $search = $request->input('search', '');
-            $search = htmlspecialchars(strip_tags($search), ENT_QUOTES, 'UTF-8'); // Sanitize input
-
-            $validator = Validator::make(['search' => $search], [
+            $validator = Validator::make($request->only('search'), [
                 'search' => 'nullable|string|max:255',
             ]);
 
             if ($validator->fails()) {
                 return redirect()->back()->withErrors($validator);
             }
+            $search = htmlspecialchars(strip_tags($request->input('search')), ENT_QUOTES, 'UTF-8');
 
             $products = Product::with('brand')
-                        ->when($search, function ($query, $search) {
-                            $query->where('name', 'like', '%' . $search . '%');
-                        })
-                        ->paginate(10);
+                ->when($search, function ($query, $search) {
+                    $query->where('name', 'like', '%' . $search . '%');
+                })
+                ->paginate(10);
 
             return view('admin.dashboard', compact('products'));
+
         } catch (\Exception $e) {
             Log::error('Error loading products dashboard: ' . $e->getMessage());
             return back()->with('error', 'Failed to load products. Please try again.');
         }
     }
+
     
     public function create()
     {
