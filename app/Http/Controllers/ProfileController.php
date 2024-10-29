@@ -65,7 +65,7 @@ class ProfileController extends Controller
                     'required', 
                     'confirmed', 
                     'min:10',
-                    'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{10,}$/',
+                    'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{10,}$/',
                     Rules\Password::defaults(),
                 ];
 
