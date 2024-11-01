@@ -11,14 +11,23 @@ class ContentSecurityPolicy
      * Handle an incoming request.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
-     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
+     * @param  \Closure  $next
+     * @return mixed
      */
     public function handle(Request $request, Closure $next)
     {
         $response = $next($request);
 
-        $response->headers->set('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self';");
+        $csp = "default-src 'self'; ";
+        $csp .= "script-src 'self'; ";
+        $csp .= "style-src 'self'; ";
+        $csp .= "img-src 'self' data:; ";
+        $csp .= "font-src 'self' data:; ";
+        $csp .= "connect-src 'self'; ";
+        $csp .= "frame-ancestors 'none'; ";
+
+        // Add the Content-Security-Policy header to the response
+        $response->headers->set('Content-Security-Policy', $csp);
 
         return $response;
     }
