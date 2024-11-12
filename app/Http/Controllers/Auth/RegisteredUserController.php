@@ -48,7 +48,7 @@ class RegisteredUserController extends Controller
                     'required', 
                     'confirmed', 
                     'min:10',
-                    'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{10,}$/',
+                    'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{10,}$/',
                     Rules\Password::defaults(),
                 ],
                 'answer_1' => ['required', 'string', 'min:3', 'max:255'],

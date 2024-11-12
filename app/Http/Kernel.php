@@ -24,6 +24,7 @@ class Kernel extends HttpKernel
         \Bepsvpt\SecureHeaders\SecureHeadersMiddleware::class,
         \App\Http\Middleware\SecurityHeaders::class,
         \Illuminate\Http\Middleware\HandleCors::class,
+        \App\Http\Middleware\ContentSecurityPolicy::class,
     ];
 
     /**
