@@ -169,12 +169,12 @@ class AdminProductController extends Controller
                     $manager = new ImageManager(new Driver());
                     $image = $manager->read($tempPath);
 
-                    $imageName = Str::uuid() . '.png';
+                    $imageName = Str::uuid() . '.' . $uploadedFile->getClientOriginalExtension();
                     $imagePath = 'images/watches/' . $imageName;
 
                     Storage::disk('public')->put(
                         $imagePath,
-                        $image->cover(800, 800)->toJpeg(80)
+                        $image->cover(800, 800)
                     );
 
                     $savedPath = Storage::disk('public')->path($imagePath);
@@ -257,7 +257,7 @@ class AdminProductController extends Controller
                 $image->cover(300, 300);
 
                 $path = 'images/watches/' . $imageName;
-                Storage::disk('public')->put($path, $image->toJpeg(80));
+                Storage::disk('public')->put($path, $image);
 
                 if ($product->image_path) {
                     Storage::disk('public')->delete($product->image_path);
