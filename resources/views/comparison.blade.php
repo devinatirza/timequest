@@ -1,5 +1,5 @@
 @extends('layouts.app')
-
+@section('title', 'Comparison')
 @section('content')
 <div class="max-w-7xl mx-auto py-12">
     <h1 class="text-5xl text-center font-display font-bold text-logo-gold mb-12">Product Comparison</h1>

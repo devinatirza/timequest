@@ -499,17 +499,6 @@ video {
 [hidden]:where(:not([hidden="until-found"])) {
   display: none;
 }
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
-}
 .fixed {
   position: fixed;
 }
@@ -565,9 +554,6 @@ video {
 }
 .ml-2 {
   margin-left: 0.5rem;
-}
-.ml-3 {
-  margin-left: 0.75rem;
 }
 .mr-4 {
   margin-right: 1rem;
@@ -923,10 +909,6 @@ video {
 .border-logo-gold\/30 {
   border-color: rgb(212 175 55 / 0.3);
 }
-.border-subheading-gold {
-  --tw-border-opacity: 1;
-  border-color: rgb(230 199 112 / var(--tw-border-opacity));
-}
 .border-transparent {
   border-color: transparent;
 }
@@ -1091,6 +1073,9 @@ video {
 .py-8 {
   padding-top: 2rem;
   padding-bottom: 2rem;
+}
+.pb-96 {
+  padding-bottom: 24rem;
 }
 .pl-12 {
   padding-left: 3rem;
@@ -1277,9 +1262,6 @@ video {
 .text-yellow-500 {
   --tw-text-opacity: 1;
   color: rgb(234 179 8 / var(--tw-text-opacity));
-}
-.underline {
-  text-decoration-line: underline;
 }
 .placeholder-gray-400::-moz-placeholder {
   --tw-placeholder-opacity: 1;
@@ -1520,10 +1502,6 @@ video {
   --tw-text-opacity: 1;
   color: rgb(31 41 55 / var(--tw-text-opacity));
 }
-.hover\:text-gray-900:hover {
-  --tw-text-opacity: 1;
-  color: rgb(17 24 39 / var(--tw-text-opacity));
-}
 .hover\:text-red-400:hover {
   --tw-text-opacity: 1;
   color: rgb(248 113 113 / var(--tw-text-opacity));
@@ -1531,6 +1509,10 @@ video {
 .hover\:text-subheading-gold:hover {
   --tw-text-opacity: 1;
   color: rgb(230 199 112 / var(--tw-text-opacity));
+}
+.hover\:text-text-brown:hover {
+  --tw-text-opacity: 1;
+  color: rgb(30 20 10 / var(--tw-text-opacity));
 }
 .hover\:text-yellow-300:hover {
   --tw-text-opacity: 1;

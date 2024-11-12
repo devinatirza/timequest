@@ -1,6 +1,5 @@
-{{-- resources/views/admin/products/create.blade.php --}}
 @extends('layouts.app')
-
+@section('title', 'Create Product')
 @section('content')
 <div class="min-h-screen bg-navbar-bg py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-3xl mx-auto">

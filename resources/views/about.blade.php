@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'About')
+@section('title', 'About Us')
 @section('content')
 <div class="bg-navbar-bg min-h-screen py-16 px-4 sm:px-6 lg:px-8 font-sans">
     <div class="max-w-5xl mx-auto">
