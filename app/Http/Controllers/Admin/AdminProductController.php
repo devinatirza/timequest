@@ -169,7 +169,7 @@ class AdminProductController extends Controller
                     $manager = new ImageManager(new Driver());
                     $image = $manager->read($tempPath);
 
-                    $imageName = Str::uuid() . '.jpg';
+                    $imageName = Str::uuid() . '.png';
                     $imagePath = 'images/watches/' . $imageName;
 
                     Storage::disk('public')->put(
