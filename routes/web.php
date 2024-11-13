@@ -25,7 +25,7 @@ Route::get('/about', function () {
     return view('about');
 });
 
-Route::middleware(['guest'])->group(function () {
+Route::middleware(['throttle:8,1'])->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login']);
 

@@ -4,7 +4,6 @@
 <div class="max-w-7xl mx-auto py-12 pb-96">
     <h1 class="text-5xl font-display font-bold text-logo-gold text-center mb-12">Exquisite Timepieces</h1>
     
-    <!-- Search and Brand Filter -->
     <div class="mb-8 flex justify-center">
         <a href="{{ route('catalog') }}" class="w-auto sm:w-1/4 lg:w-1/6 px-2 flex">
             <div class="w-full py-4 text-center cursor-pointer transition-all duration-300 flex items-center justify-center rounded-full
@@ -32,13 +31,10 @@
         </div>
     </div>
 
-
-    <!-- Product Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" id="productContainer">
         @foreach($products as $product)
         <div class="relative group">
             <div class="bg-black bg-opacity-50 rounded-lg shadow-lg overflow-hidden transform transition-transform duration-300 group-hover:scale-105 flex flex-col h-full">
-                <!-- Product Image and Details -->
                 <div class="aspect-square flex items-center justify-center h-64"> 
                     <img src="{{ asset($product->image_path) }}" alt="{{ $product->name }}" class="object-contain h-full w-auto">
                 </div>
@@ -48,12 +44,10 @@
                     <p class="text-subheading-gold">{{ $product->brand->name }}</p>
                 </div>
 
-                <!-- Hover Overlay with Wishlist and Compare Button -->
                 <div class="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <div class="text-center p-4">
                         <p class="text-white mb-4">{{ $product->description }}</p>
 
-                        <!-- Wishlist Button -->
                         @if (Auth::check())
                             <button onclick="toggleWishlist('{{ $product->id }}')" class="bg-logo-gold text-button-text px-4 py-2 rounded hover:bg-subheading-gold transition-colors duration-300">
                                 @php
@@ -70,38 +64,36 @@
                             </button>
                         @endif
 
-                        <!-- Compare Button -->
-                        <button onclick="toggleComparison('{{ $product->id }}', '{{ $product->name }}', '{{ asset($product->image_path) }}')" 
-                                class="mt-4 px-4 py-2 rounded transition-colors duration-300 bg-button-gray text-gray-800 hover:bg-button-light-gray">
+                        <button class="compare-button mt-4 px-4 py-2 rounded transition-colors duration-300 bg-button-gray text-gray-800 hover:bg-button-light-gray"
+                                data-id="{{ $product->id }}"
+                                data-name="{{ $product->name }}"
+                                data-img="{{ asset($product->image_path) }}">
                             Compare
                         </button>
+
                     </div>
                 </div>
             </div>
         </div>
         @endforeach
     </div>
-    
-    <!-- Comparison Bar at the Bottom -->
+
     <div id="comparisonBar" style="display: none; position: fixed; bottom: 0; left: 0; right: 0; background-color: #333; color: white; padding: 16px; display: flex; align-items: center; justify-content: space-between; border-top: 2px solid #D4AF37; box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1); z-index: 50;">
         <div class="flex items-center gap-4 overflow-x-auto">
             <template id="compareItemTemplate">
                 <div class="flex items-center bg-navbar-bg bg-opacity-50 px-4 py-2 rounded-full space-x-2 relative">
-                    <!-- Center-Cropped Image -->
                     <img src="" alt="Product" class="w-12 h-12 object-cover object-center rounded-full">
                     
-                    <!-- Product Name -->
                     <span class="text-logo-gold"></span>
                     
-                    <!-- Remove Button (Red "×") -->
-                    <button onclick="removeCompareItem(this)" class="text-button-red hover:text-button-red-hover font-bold ml-2 text-xl transition-colors duration-300">
+                    <button onclick="removeCompareItem(this)" class="text-button-red hover:text-button-red-hover font-bold ml-2 text-xl transition-colors duration-300"
+                        id="{{ $product->id }}">
                         &times;
                     </button>
                 </div>
             </template>
         </div>
 
-        <!-- Compare Button -->
         <div class="flex items-center gap-4">
             <button onclick="showComparison()" id="compareButton" class="bg-logo-gold text-black px-4 py-2 rounded transition-colors duration-300" style="display: none;">
                 Compare (2)
@@ -217,7 +209,6 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = '{{ route('login') }}';
     };
 
-    // Close modal when clicking outside
     const modal = document.getElementById('loginModal');
     modal.addEventListener('click', function(e) {
         if (e.target === modal) {
@@ -225,7 +216,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Close modal with ESC key
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
             closeLoginModal();
@@ -276,28 +266,46 @@ function toggleComparison(id, name, imgSrc) {
         selectedProducts.push({ id, name, imgSrc });
         addCompareItem(id, imgSrc, name);
     } else { 
-        selectedProducts.splice(index, 1);
-        removeCompareItemById(id);
+        alert(`The selected product is already in the comparison bar.`);
     }
 
     updateComparisonBar();
 }
 
+document.querySelectorAll('.compare-button').forEach(button => {
+    button.addEventListener('click', function () {
+        const id = button.getAttribute('data-id');
+        const name = button.getAttribute('data-name');
+        const imgSrc = button.getAttribute('data-img');
+
+        toggleComparison(id, name, imgSrc);
+    });
+});
+
+
 function addCompareItem(id, imgSrc, name) {
+    const existingItem = document.querySelector(`.compare-item[data-id="${id}"]`);
+    if (existingItem) {
+        alert(`The selected product is already in the comparison bar.`);
+        return; 
+    }
+
     const template = document.getElementById('compareItemTemplate').content.cloneNode(true);
+    const compareItemContainer = document.querySelector('#comparisonBar .flex.items-center.gap-4');
+
+    const compareItem = template.querySelector('.flex.items-center');
+    template.querySelector('button').id = id;
     template.querySelector('img').src = imgSrc;
     template.querySelector('span').textContent = name;
-    template.querySelector('button').setAttribute('data-id', id);
-    document.getElementById('comparisonBar').querySelector('.flex.items-center.gap-4').appendChild(template);
+
+    compareItemContainer.appendChild(template);
 }
 
+
 function removeCompareItem(button) {
-    const id = button.getAttribute('data-id');
+    const id = button.getAttribute('id');
     selectedProducts = selectedProducts.filter(item => item.id !== id);
     button.closest('.flex').remove();
-    document.querySelectorAll('.compare-button').forEach(btn => {
-        if (btn.getAttribute('onclick').includes(id)) btn.innerText = "Compare";
-    });
 
     updateComparisonBar();
 }
@@ -316,6 +324,7 @@ function updateComparisonBar() {
     comparisonBar.style.display = selectedProducts.length > 0 ? 'flex' : 'none';
     compareButton.style.display = selectedProducts.length === 2 ? 'inline-block' : 'none';
 }
+
 </script>
 
 <style>

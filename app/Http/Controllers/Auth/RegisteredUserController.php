@@ -103,11 +103,11 @@ class RegisteredUserController extends Controller
                     $manager = new ImageManager(new Driver());
                     $image = $manager->read($tempPath);
 
-                    $imageName = Str::uuid() . '.jpg';
+                    $imageName = Str::uuid() . '.png';
                     $path = storage_path('app/private/user_profiles/' . $imageName);
 
                     $image->cover(300, 300)
-                        ->toJpeg(80)
+                        ->toPng()
                         ->save($path);
 
                     $imagePath = 'user_profiles/' . $imageName;

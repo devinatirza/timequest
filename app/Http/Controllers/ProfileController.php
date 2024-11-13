@@ -121,11 +121,11 @@ class ProfileController extends Controller
                     $manager = new ImageManager(new Driver());
                     $image = $manager->read($tempPath);
 
-                    $imageName = Str::uuid() . '.jpg';
+                    $imageName = Str::uuid() . '.png';
                     $path = storage_path('app/private/user_profiles/' . $imageName);
 
                     $image->cover(300, 300)
-                        ->toJpeg(80)
+                        ->toPng()
                         ->save($path);
 
                     $imagePath = 'user_profiles/' . $imageName;
@@ -173,35 +173,27 @@ class ProfileController extends Controller
     public function destroy(Request $request): RedirectResponse
     {
         try {
-            // Validate that password is provided
             $request->validateWithBag('userDeletion', [
                 'password' => ['required', 'string'],
             ]);
     
-            // Retrieve the authenticated user
             $user = $request->user();
     
-            // Check if the provided password is correct using the custom checkPassword function
             if (!$this->checkPassword($user, $request->input('password'))) {
-                // If the password check fails, log the attempt and return an error
                 Log::warning('Password mismatch during account deletion for user ID: ' . $user->id);
                 return redirect()->route('profile.destroy')->withErrors(['password' => 'The provided password is incorrect.'], 'userDeletion')->with('showDeleteModal', true);
             }
     
-            // Proceed with account deletion if the password is correct
             Log::warning('Account deletion initiated for user ID: ' . $user->id);
     
             Auth::logout();
     
-            // Delete user's image from storage if it exists
             if ($user->image_path && Storage::disk('private')->exists($user->image_path)) {
                 Storage::disk('private')->delete($user->image_path);
             }
     
-            // Delete the user
             $user->delete();
     
-            // Invalidate the session and regenerate the CSRF token
             $request->session()->invalidate();
             $request->session()->regenerateToken();
     
@@ -218,9 +210,6 @@ class ProfileController extends Controller
         }
     }
     
-    /**
-     * Custom password checking method with salt.
-     */
     protected function checkPassword(User $user, string $password): bool
     {
         $saltedPassword = $user->salt . $password;

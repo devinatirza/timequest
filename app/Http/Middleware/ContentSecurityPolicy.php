@@ -26,7 +26,6 @@ class ContentSecurityPolicy
         $csp .= "connect-src 'self'; ";
         $csp .= "frame-ancestors 'none'; ";
 
-        // Add the Content-Security-Policy header to the response
         $response->headers->set('Content-Security-Policy', $csp);
 
         return $response;
