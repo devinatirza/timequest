@@ -248,6 +248,13 @@ class AdminProductController extends Controller
                 'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
             ]);
 
+            $sanitized = [
+                'name' => strip_tags($validated['name']),
+                'description' => strip_tags($validated['description']),
+                'price' => round(floatval($validated['price']), 2),
+                'brand_id' => $validated['brand_id']
+            ];
+
             if ($request->hasFile('image')) {
                 $uploadedFile = $request->file('image');
                 $imageName = Str::uuid() . '.' . $uploadedFile->getClientOriginalExtension();
@@ -263,10 +270,13 @@ class AdminProductController extends Controller
                     Storage::disk('public')->delete($product->image_path);
                 }
 
-                $validated['image_path'] = $path;
+                // $validated['image_path'] = $path;
+                $sanitized['image_path'] = $path;
             }
 
-            $product->update($validated);
+            
+
+            $product->update($sanitized);
 
             Log::info('Product updated by admin', [
                 'admin_id' => auth()->id(),
