@@ -43,7 +43,7 @@
                         Name
                     </label>
                     <input type="text" name="name" id="name" value="{{ old('name', $user->name) }}"
-                           class="mt-1 block w-full border border-logo-gold bg-black bg-opacity-50 rounded-md shadow-sm text-menu-text">
+                           class="mt-1 px-3 block w-full border border-logo-gold bg-black bg-opacity-50 rounded-md shadow-sm text-menu-text">
                     @error('name')
                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -54,7 +54,7 @@
                         Email
                     </label>
                     <input type="email" name="email" id="email" value="{{ old('email', $user->email) }}"
-                           class="mt-1 block w-full border border-logo-gold bg-black bg-opacity-50 rounded-md shadow-sm text-menu-text">
+                           class="mt-1 px-3 block w-full border border-logo-gold bg-black bg-opacity-50 rounded-md shadow-sm text-menu-text">
                     @error('email')
                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -65,7 +65,7 @@
                         Current Password (only if changing password)
                     </label>
                     <input type="password" name="current_password" id="current_password"
-                           class="mt-1 block w-full border border-logo-gold bg-black bg-opacity-50 rounded-md shadow-sm text-menu-text">
+                           class="mt-1 px-3 block w-full border border-logo-gold bg-black bg-opacity-50 rounded-md shadow-sm text-menu-text">
                     @error('current_password')
                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -76,7 +76,7 @@
                         New Password (leave blank if not changing)
                     </label>
                     <input type="password" name="password" id="password"
-                           class="mt-1 block w-full border border-logo-gold bg-black bg-opacity-50 rounded-md shadow-sm text-menu-text">
+                           class="mt-1 px-3 block w-full border border-logo-gold bg-black bg-opacity-50 rounded-md shadow-sm text-menu-text">
                     @error('password')
                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -87,7 +87,7 @@
                         Confirm New Password
                     </label>
                     <input type="password" name="password_confirmation" id="password_confirmation"
-                           class="mt-1 block w-full border border-logo-gold bg-black bg-opacity-50 rounded-md shadow-sm text-menu-text">
+                           class="mt-1 px-3 block w-full border border-logo-gold bg-black bg-opacity-50 rounded-md shadow-sm text-menu-text">
                 </div>
 
                 <div>

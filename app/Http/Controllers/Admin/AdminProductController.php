@@ -234,6 +234,7 @@ class AdminProductController extends Controller
     public function edit(Product $product)
     {
         $brands = Brand::all();
+        
         return view('admin.edit', compact('product', 'brands'));
     }
 

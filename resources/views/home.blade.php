@@ -21,7 +21,7 @@
     <div class="absolute inset-0 flex flex-col items-center justify-center text-white px-4 z-20">
 
         @if (session('login_success'))
-            <h1 class="text-5xl md:text-7xl font-display font-bold mb-2 text-center text-white tracking-wider">Login Successful! Welcome Back!</h1>
+            <h1 class="text-5xl md:text-5xl font-display font-bold mb-2 text-center text-white tracking-wider">Welcome Back!</h1>
         @elseif (Auth::check()) 
             <h1 class="text-5xl md:text-7xl font-display font-bold mb-1 text-center text-white tracking-wider">TimeQuest</h1>
         @else
@@ -34,7 +34,7 @@
             </script>
         @endif
 
-        <p class="text-2xl md:text-3xl font-serif mb-6 text-subheading-gold italic">Discover Timeless Elegance</p>
+        <p class="text-2xl md:text-3xl font-serif mb-4 text-subheading-gold italic">Discover Timeless Elegance</p>
         @if(Auth::check() && auth()->user()->isAdmin())
             <a href="/admin/dashboard" class="bg-logo-gold text-navbar-bg py-3 px-8 rounded-full text-xl font-sans font-semibold hover:bg-subheading-gold transition duration-300 uppercase tracking-wide">
                 Open Dashboard

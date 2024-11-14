@@ -20,9 +20,9 @@ class ContentSecurityPolicy
 
         $csp = "default-src 'self'; ";
         $csp .= "script-src 'self'; ";
-        $csp .= "style-src 'self'; ";
+        $csp .= "style-src 'self' https://fonts.googleapis.com https://cdnjs.cloudflare.com; ";
+        $csp .= "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:; ";
         $csp .= "img-src 'self' data:; ";
-        $csp .= "font-src 'self' data:; ";
         $csp .= "connect-src 'self'; ";
         $csp .= "frame-ancestors 'none'; ";
 
@@ -31,3 +31,4 @@ class ContentSecurityPolicy
         return $response;
     }
 }
+

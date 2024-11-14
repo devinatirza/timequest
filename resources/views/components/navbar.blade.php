@@ -2,7 +2,7 @@
     <div style="max-width: 80rem; margin-left: auto; margin-right: auto; padding: 0.75rem 1rem;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <div>
-                <a href="/" style="font-family: 'Playfair Display', serif; color: #FFD700; font-size: 1.65rem; font-weight: bold; letter-spacing: 0.05em;">TimeQuest</a>
+                <a href="/" style="font-family: 'Cinzel', serif; color: #FFD700; font-size: 1.55rem; font-weight: bold; letter-spacing: 0.05em;">TimeQuest</a>
             </div>
             <div style="display: flex; gap: 2rem;">
                 @if(Auth::check() && auth()->user()->isAdmin())
