@@ -17,8 +17,8 @@ class ComparisonController extends Controller
         $productIds = explode(',', $validated['products']);
         $products = Product::whereIn('id', $productIds)->get();
     
-        if ($products->count() < 2 && $products->count() > 3) {
-            return redirect()->route('catalog')->withErrors('Please select minimum 2 and maximum 3 products for comparison.');
+        if ($products->count() != 2) {
+            return redirect()->route('catalog')->withErrors('Please select 2 products for comparison.');
         }
     
         return view('comparison', compact('products'));

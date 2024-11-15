@@ -96,7 +96,7 @@
 
         <div class="flex items-center gap-4">
             <button onclick="showComparison()" id="compareButton" class="bg-logo-gold text-black px-4 py-2 rounded transition-colors duration-300" style="display: none;">
-                Compare (2)
+                Compare
             </button>
         </div>
     </div>
@@ -260,7 +260,7 @@ function toggleComparison(id, name, imgSrc) {
     
     if (index === -1) { 
         if (selectedProducts.length >= 2) {
-            alert("You can only compare up to 2 products.");
+            alert("You can only compare 2 products.");
             return;
         }
         selectedProducts.push({ id, name, imgSrc });
