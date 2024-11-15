@@ -11,6 +11,7 @@
     <meta property="og:description" content="Explore timeless elegance with TimeQuest, your destination for luxury watches." />
     <meta property="og:url" content="https://timequest.xyz" />
     <meta property="og:image" content="{{ asset('timequest_og.png') }}" />
+    <link rel="canonical" href="https://timequest.xyz" />
 
     <title>@yield('title', 'TimeQuest')</title>
     <link rel="icon" href="{{ asset('timequest_favicon.ico') }}" type="image/x-icon">
